@@ -14,7 +14,136 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      employer_profiles: {
+        Row: {
+          company_description: string | null
+          company_name: string
+          company_size: Database["public"]["Enums"]["company_size"] | null
+          contact_person: string
+          created_at: string | null
+          designation: string | null
+          id: string
+          profile_id: string
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          company_description?: string | null
+          company_name: string
+          company_size?: Database["public"]["Enums"]["company_size"] | null
+          contact_person: string
+          created_at?: string | null
+          designation?: string | null
+          id?: string
+          profile_id: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          company_description?: string | null
+          company_name?: string
+          company_size?: Database["public"]["Enums"]["company_size"] | null
+          contact_person?: string
+          created_at?: string | null
+          designation?: string | null
+          id?: string
+          profile_id?: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employer_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_seeker_profiles: {
+        Row: {
+          created_at: string | null
+          experience_level:
+            | Database["public"]["Enums"]["experience_level"]
+            | null
+          first_name: string
+          id: string
+          last_name: string
+          profile_id: string
+          resume_url: string | null
+          skills: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          experience_level?:
+            | Database["public"]["Enums"]["experience_level"]
+            | null
+          first_name: string
+          id?: string
+          last_name: string
+          profile_id: string
+          resume_url?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          experience_level?:
+            | Database["public"]["Enums"]["experience_level"]
+            | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          profile_id?: string
+          resume_url?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_seeker_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          location: string | null
+          phone: string | null
+          updated_at: string | null
+          user_id: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          location?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          user_id: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          location?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +152,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      company_size: "startup" | "small" | "medium" | "large" | "enterprise"
+      experience_level: "fresher" | "junior" | "mid" | "senior"
+      user_type: "jobseeker" | "employer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +281,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      company_size: ["startup", "small", "medium", "large", "enterprise"],
+      experience_level: ["fresher", "junior", "mid", "senior"],
+      user_type: ["jobseeker", "employer"],
+    },
   },
 } as const

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,12 +7,146 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Users, Building2, Mail, Lock, Eye, EyeOff, User, Phone, MapPin } from "lucide-react";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [userType, setUserType] = useState("jobseeker");
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    // Job Seeker fields
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    location: "",
+    experienceLevel: "",
+    password: "",
+    confirmPassword: "",
+    // Employer fields
+    companyName: "",
+    contactPerson: "",
+    designation: "",
+    companySize: "",
+    // Common
+    acceptTerms: false
+  });
+
+  const { signUp } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const validateForm = () => {
+    if (userType === "jobseeker") {
+      if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword) {
+        toast({
+          title: "Missing Fields",
+          description: "Please fill in all required fields.",
+          variant: "destructive"
+        });
+        return false;
+      }
+    } else {
+      if (!formData.companyName || !formData.contactPerson || !formData.email || !formData.password || !formData.confirmPassword) {
+        toast({
+          title: "Missing Fields", 
+          description: "Please fill in all required fields.",
+          variant: "destructive"
+        });
+        return false;
+      }
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match.",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      toast({
+        title: "Weak Password",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    if (!formData.acceptTerms) {
+      toast({
+        title: "Terms Required",
+        description: "Please accept the terms and conditions.",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      const userData = {
+        userType,
+        phone: formData.phone,
+        location: formData.location,
+        // Job seeker specific
+        ...(userType === "jobseeker" && {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          experienceLevel: formData.experienceLevel
+        }),
+        // Employer specific
+        ...(userType === "employer" && {
+          companyName: formData.companyName,
+          contactPerson: formData.contactPerson,
+          designation: formData.designation,
+          companySize: formData.companySize
+        })
+      };
+
+      const { error } = await signUp(formData.email, formData.password, userData);
+      
+      if (error) {
+        toast({
+          title: "Registration Failed",
+          description: error.message || "An error occurred during registration.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Registration Successful!",
+          description: "Welcome to Pravah! Your account has been created.",
+        });
+        navigate("/");
+      }
+    } catch (error) {
+      toast({
+        title: "Registration Failed",
+        description: "An unexpected error occurred.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
@@ -48,6 +182,8 @@ const Register = () => {
                         id="first-name"
                         placeholder="First name"
                         className="pl-10"
+                        value={formData.firstName}
+                        onChange={(e) => handleInputChange("firstName", e.target.value)}
                       />
                     </div>
                   </div>
@@ -56,6 +192,8 @@ const Register = () => {
                     <Input
                       id="last-name"
                       placeholder="Last name"
+                      value={formData.lastName}
+                      onChange={(e) => handleInputChange("lastName", e.target.value)}
                     />
                   </div>
                 </div>
@@ -69,6 +207,8 @@ const Register = () => {
                       type="email"
                       placeholder="your.email@example.com"
                       className="pl-10"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
                     />
                   </div>
                 </div>
@@ -82,6 +222,8 @@ const Register = () => {
                       type="tel"
                       placeholder="+91 98765 43210"
                       className="pl-10"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange("phone", e.target.value)}
                     />
                   </div>
                 </div>
@@ -94,13 +236,15 @@ const Register = () => {
                       id="location"
                       placeholder="City, State"
                       className="pl-10"
+                      value={formData.location}
+                      onChange={(e) => handleInputChange("location", e.target.value)}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="experience">Experience Level</Label>
-                  <Select>
+                  <Select value={formData.experienceLevel} onValueChange={(value) => handleInputChange("experienceLevel", value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select experience level" />
                     </SelectTrigger>
@@ -122,6 +266,8 @@ const Register = () => {
                       type={showPassword ? "text" : "password"}
                       placeholder="Create password"
                       className="pl-10 pr-10"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange("password", e.target.value)}
                     />
                     <Button
                       type="button"
@@ -148,6 +294,8 @@ const Register = () => {
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm password"
                       className="pl-10 pr-10"
+                      value={formData.confirmPassword}
+                      onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                     />
                     <Button
                       type="button"
@@ -166,10 +314,10 @@ const Register = () => {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id="terms"
-                    className="rounded"
+                    checked={formData.acceptTerms}
+                    onCheckedChange={(checked) => handleInputChange("acceptTerms", checked)}
                   />
                   <Label htmlFor="terms" className="text-sm">
                     I agree to the{" "}
@@ -183,8 +331,8 @@ const Register = () => {
                   </Label>
                 </div>
 
-                <Button className="w-full">
-                  Create Job Seeker Account
+                <Button className="w-full" onClick={handleSubmit} disabled={loading}>
+                  {loading ? "Creating Account..." : "Create Job Seeker Account"}
                 </Button>
               </TabsContent>
 
@@ -197,6 +345,8 @@ const Register = () => {
                       id="company-name"
                       placeholder="Your company name"
                       className="pl-10"
+                      value={formData.companyName}
+                      onChange={(e) => handleInputChange("companyName", e.target.value)}
                     />
                   </div>
                 </div>
@@ -210,6 +360,8 @@ const Register = () => {
                       type="email"
                       placeholder="hr@company.com"
                       className="pl-10"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
                     />
                   </div>
                 </div>
@@ -223,6 +375,8 @@ const Register = () => {
                         id="contact-name"
                         placeholder="Your full name"
                         className="pl-10"
+                        value={formData.contactPerson}
+                        onChange={(e) => handleInputChange("contactPerson", e.target.value)}
                       />
                     </div>
                   </div>
@@ -231,6 +385,8 @@ const Register = () => {
                     <Input
                       id="designation"
                       placeholder="HR Manager"
+                      value={formData.designation}
+                      onChange={(e) => handleInputChange("designation", e.target.value)}
                     />
                   </div>
                 </div>
@@ -244,6 +400,8 @@ const Register = () => {
                       type="tel"
                       placeholder="+91 98765 43210"
                       className="pl-10"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange("phone", e.target.value)}
                     />
                   </div>
                 </div>
@@ -256,13 +414,15 @@ const Register = () => {
                       id="company-location"
                       placeholder="City, State"
                       className="pl-10"
+                      value={formData.location}
+                      onChange={(e) => handleInputChange("location", e.target.value)}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="company-size">Company Size</Label>
-                  <Select>
+                  <Select value={formData.companySize} onValueChange={(value) => handleInputChange("companySize", value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select company size" />
                     </SelectTrigger>
@@ -285,6 +445,8 @@ const Register = () => {
                       type={showPassword ? "text" : "password"}
                       placeholder="Create password"
                       className="pl-10 pr-10"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange("password", e.target.value)}
                     />
                     <Button
                       type="button"
@@ -311,6 +473,8 @@ const Register = () => {
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm password"
                       className="pl-10 pr-10"
+                      value={formData.confirmPassword}
+                      onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                     />
                     <Button
                       type="button"
@@ -329,10 +493,10 @@ const Register = () => {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id="employer-terms"
-                    className="rounded"
+                    checked={formData.acceptTerms}
+                    onCheckedChange={(checked) => handleInputChange("acceptTerms", checked)}
                   />
                   <Label htmlFor="employer-terms" className="text-sm">
                     I agree to the{" "}
@@ -346,8 +510,8 @@ const Register = () => {
                   </Label>
                 </div>
 
-                <Button className="w-full">
-                  Create Employer Account
+                <Button className="w-full" onClick={handleSubmit} disabled={loading}>
+                  {loading ? "Creating Account..." : "Create Employer Account"}
                 </Button>
               </TabsContent>
             </Tabs>

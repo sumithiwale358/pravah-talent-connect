@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -5,43 +6,73 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Clock, Bookmark, Filter, Users, Star } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const JobSeekerPortal = () => {
-  const featuredJobs = [
-    {
-      id: 1,
-      title: "Senior Software Developer",
-      company: "TechCorp Solutions",
-      location: "Bangalore, Karnataka",
-      salary: "₹12-18 LPA",
-      type: "Full-time",
-      posted: "2 days ago",
-      tags: ["React", "Node.js", "Python"],
-      rating: 4.5
-    },
-    {
-      id: 2,
-      title: "Digital Marketing Manager",
-      company: "Growth Marketing Pvt Ltd",
-      location: "Mumbai, Maharashtra",
-      salary: "₹8-12 LPA",
-      type: "Full-time",
-      posted: "1 day ago",
-      tags: ["SEO", "Social Media", "Analytics"],
-      rating: 4.2
-    },
-    {
-      id: 3,
-      title: "UI/UX Designer",
-      company: "Design Studio India",
-      location: "Delhi, NCR",
-      salary: "₹6-10 LPA",
-      type: "Full-time",
-      posted: "3 days ago",
-      tags: ["Figma", "Adobe XD", "Prototyping"],
-      rating: 4.7
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const fetchJobs = async () => {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('jobs')
+        .select(`
+          id,
+          title,
+          description,
+          country,
+          min_salary,
+          max_salary,
+          hide_salary,
+          min_experience,
+          max_experience,
+          openings,
+          created_at,
+          status,
+          employer_profiles (
+            company_name,
+            company_description
+          )
+        `)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setJobs(data || []);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const formatSalary = (job: any) => {
+    if (job.hide_salary) return "Salary not disclosed";
+    if (job.min_salary && job.max_salary) {
+      return `₹${(job.min_salary / 100000).toFixed(0)}-${(job.max_salary / 100000).toFixed(0)} LPA`;
+    }
+    if (job.min_salary) {
+      return `₹${(job.min_salary / 100000).toFixed(0)}+ LPA`;
+    }
+    return "Salary not mentioned";
+  };
+
+  const getTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const past = new Date(dateString);
+    const diffInHours = Math.floor((now.getTime() - past.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 24) {
+      return `${diffInHours} hours ago`;
+    }
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} days ago`;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -113,57 +144,72 @@ const JobSeekerPortal = () => {
             </div>
 
             <div className="grid gap-6">
-              {featuredJobs.map((job) => (
-                <Card key={job.id} className="p-6 hover:shadow-elevation transition-shadow duration-300">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-xl font-semibold text-foreground">{job.title}</h3>
-                        <Button variant="ghost" size="icon">
-                          <Bookmark className="w-5 h-5" />
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="text-muted-foreground">Loading jobs...</div>
+                </div>
+              ) : jobs.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-muted-foreground">No jobs found. Check back later!</div>
+                </div>
+              ) : (
+                jobs.map((job) => (
+                  <Card key={job.id} className="p-6 hover:shadow-elevation transition-shadow duration-300">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="text-xl font-semibold text-foreground">{job.title}</h3>
+                          <Button variant="ghost" size="icon">
+                            <Bookmark className="w-5 h-5" />
+                          </Button>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 text-muted-foreground mb-3">
+                          <div className="flex items-center gap-1">
+                            <Users className="w-4 h-4" />
+                            {job.employer_profiles?.company_name || "Company"}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Star className="w-4 h-4 fill-primary text-primary" />
+                            4.0
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-4 h-4" />
+                            {job.country || "India"}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {getTimeAgo(job.created_at)}
+                          </div>
+                          <Badge variant="secondary">Full-time</Badge>
+                        </div>
+
+                        {job.min_experience && job.max_experience && (
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            <Badge variant="outline">
+                              {job.min_experience}-{job.max_experience} years exp
+                            </Badge>
+                            {job.openings && (
+                              <Badge variant="outline">{job.openings} openings</Badge>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="text-lg font-semibold text-primary">{formatSalary(job)}</div>
+                      </div>
+
+                      <div className="mt-4 md:mt-0 md:ml-6">
+                        <Button className="w-full md:w-auto">
+                          Apply Now
                         </Button>
                       </div>
-                      
-                      <div className="flex items-center gap-4 text-muted-foreground mb-3">
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          {job.company}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-primary text-primary" />
-                          {job.rating}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-4 h-4" />
-                          {job.location}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {job.posted}
-                        </div>
-                        <Badge variant="secondary">{job.type}</Badge>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {job.tags.map((tag) => (
-                          <Badge key={tag} variant="outline">{tag}</Badge>
-                        ))}
-                      </div>
-
-                      <div className="text-lg font-semibold text-primary">{job.salary}</div>
                     </div>
-
-                    <div className="mt-4 md:mt-0 md:ml-6">
-                      <Button className="w-full md:w-auto">
-                        Apply Now
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))
+              )}
             </div>
 
             <div className="text-center mt-8">

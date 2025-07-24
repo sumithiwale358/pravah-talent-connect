@@ -11,10 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Building2, MapPin, Users, IndianRupee } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const PostJob = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -56,9 +59,55 @@ const PostJob = () => {
     }
 
     try {
-      // In a real app, this would submit to the backend
-      // For now, we'll simulate the submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Get current user's employer profile
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      // Get employer profile ID
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      const { data: employerProfile } = await supabase
+        .from('employer_profiles')
+        .select('id')
+        .eq('profile_id', profile.id)
+        .single();
+
+      if (!employerProfile) {
+        throw new Error("Employer profile not found");
+      }
+
+      // Create job posting
+      const jobData = {
+        title: formData.title,
+        description: formData.description,
+        employer_profile_id: employerProfile.id,
+        country: formData.country,
+        min_salary: formData.minSalary ? parseInt(formData.minSalary) : null,
+        max_salary: formData.maxSalary ? parseInt(formData.maxSalary) : null,
+        hide_salary: formData.hideSalary,
+        min_experience: formData.minExperience ? parseFloat(formData.minExperience) : null,
+        max_experience: formData.maxExperience ? parseFloat(formData.maxExperience) : null,
+        openings: formData.openings ? parseInt(formData.openings) : null,
+        gender: formData.gender || null,
+        expires_at: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : null,
+        status: 'active'
+      };
+
+      const { error } = await (supabase as any)
+        .from('jobs')
+        .insert([jobData]);
+
+      if (error) throw error;
       
       toast({
         title: "Job Posted Successfully!",
@@ -67,9 +116,10 @@ const PostJob = () => {
       
       navigate("/employer");
     } catch (error) {
+      console.error('Error posting job:', error);
       toast({
         title: "Error",
-        description: "Failed to post job. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to post job. Please try again.",
         variant: "destructive"
       });
     } finally {

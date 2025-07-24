@@ -6,17 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, Users, TrendingUp, Plus, Eye, Clock, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const EmployerPortal = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [selectedJob, setSelectedJob] = useState<number | null>(null);
 
   const handlePostJob = () => {
-    toast({
-      title: "Post a Job",
-      description: "Redirecting to job posting form...",
-    });
-    // In a real app, this would navigate to a job posting form
+    navigate("/post-job");
   };
 
   const handleBrowseCandidates = () => {

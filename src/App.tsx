@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import JobSeekerPortal from "./pages/JobSeekerPortal";
 import EmployerPortal from "./pages/EmployerPortal";
+import PostJob from "./pages/PostJob";
 import About from "./pages/About";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/job-seeker" element={<JobSeekerPortal />} />
             <Route path="/employer" element={<EmployerPortal />} />
+            <Route path="/post-job" element={<PostJob />} />
             <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

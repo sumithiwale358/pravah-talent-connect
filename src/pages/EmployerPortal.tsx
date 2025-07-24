@@ -4,8 +4,69 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Users, TrendingUp, Plus, Eye, Clock, CheckCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const EmployerPortal = () => {
+  const { toast } = useToast();
+  const [selectedJob, setSelectedJob] = useState<number | null>(null);
+
+  const handlePostJob = () => {
+    toast({
+      title: "Post a Job",
+      description: "Redirecting to job posting form...",
+    });
+    // In a real app, this would navigate to a job posting form
+  };
+
+  const handleBrowseCandidates = () => {
+    toast({
+      title: "Browse Candidates",
+      description: "Loading candidate database...",
+    });
+    // In a real app, this would navigate to candidate browsing page
+  };
+
+  const handleViewAllJobs = () => {
+    toast({
+      title: "View All Jobs",
+      description: "Loading complete job listings...",
+    });
+    // In a real app, this would navigate to all jobs page
+  };
+
+  const handleViewJob = (jobId: number) => {
+    setSelectedJob(jobId);
+    toast({
+      title: "View Job Details",
+      description: `Loading details for job ID: ${jobId}`,
+    });
+    // In a real app, this would navigate to job details page
+  };
+
+  const handleEditJob = (jobId: number) => {
+    toast({
+      title: "Edit Job",
+      description: `Opening editor for job ID: ${jobId}`,
+    });
+    // In a real app, this would navigate to job editing form
+  };
+
+  const handleGetStarted = (plan: string) => {
+    toast({
+      title: `${plan} Plan`,
+      description: "Redirecting to subscription page...",
+    });
+    // In a real app, this would navigate to subscription/payment page
+  };
+
+  const handleContactSales = () => {
+    toast({
+      title: "Contact Sales",
+      description: "Opening contact form...",
+    });
+    // In a real app, this would open contact form or navigate to contact page
+  };
   const features = [
     {
       icon: Users,
@@ -75,11 +136,11 @@ const EmployerPortal = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                <Button size="lg" className="flex items-center gap-2">
+                <Button size="lg" className="flex items-center gap-2" onClick={handlePostJob}>
                   <Plus className="w-5 h-5" />
                   Post a Job
                 </Button>
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="lg" onClick={handleBrowseCandidates}>
                   Browse Candidates
                 </Button>
               </div>
@@ -131,7 +192,7 @@ const EmployerPortal = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-bold text-foreground">Recent Job Postings</h2>
-              <Button variant="outline">View All</Button>
+              <Button variant="outline" onClick={handleViewAllJobs}>View All</Button>
             </div>
 
             <div className="grid gap-4">
@@ -160,11 +221,11 @@ const EmployerPortal = () => {
                     </div>
 
                     <div className="flex gap-2 mt-4 md:mt-0">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => handleViewJob(job.id)}>
                         <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
-                      <Button size="sm">
+                      <Button size="sm" onClick={() => handleEditJob(job.id)}>
                         Edit
                       </Button>
                     </div>
@@ -206,7 +267,7 @@ const EmployerPortal = () => {
                     Email support
                   </li>
                 </ul>
-                <Button variant="outline" className="w-full">Get Started</Button>
+                <Button variant="outline" className="w-full" onClick={() => handleGetStarted("Starter")}>Get Started</Button>
               </Card>
 
               {/* Professional Plan */}
@@ -234,7 +295,7 @@ const EmployerPortal = () => {
                     Analytics dashboard
                   </li>
                 </ul>
-                <Button className="w-full">Get Started</Button>
+                <Button className="w-full" onClick={() => handleGetStarted("Professional")}>Get Started</Button>
               </Card>
 
               {/* Enterprise Plan */}
@@ -259,7 +320,7 @@ const EmployerPortal = () => {
                     SLA support
                   </li>
                 </ul>
-                <Button variant="outline" className="w-full">Contact Sales</Button>
+                <Button variant="outline" className="w-full" onClick={handleContactSales}>Contact Sales</Button>
               </Card>
             </div>
           </div>

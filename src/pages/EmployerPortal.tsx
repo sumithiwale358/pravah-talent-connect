@@ -14,6 +14,7 @@ const EmployerPortal = () => {
   const [selectedJob, setSelectedJob] = useState<number | null>(null);
 
   const handlePostJob = () => {
+    console.log("Navigating to post job page...");
     navigate("/post-job");
   };
 
@@ -65,6 +66,7 @@ const EmployerPortal = () => {
     });
     // In a real app, this would open contact form or navigate to contact page
   };
+
   const features = [
     {
       icon: Users,

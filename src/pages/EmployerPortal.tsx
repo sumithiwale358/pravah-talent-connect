@@ -19,11 +19,7 @@ const EmployerPortal = () => {
   };
 
   const handleBrowseCandidates = () => {
-    toast({
-      title: "Browse Candidates",
-      description: "Loading candidate database...",
-    });
-    // In a real app, this would navigate to candidate browsing page
+    navigate("/browse-candidates");
   };
 
   const handleViewAllJobs = () => {

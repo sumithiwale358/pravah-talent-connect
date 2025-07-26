@@ -7,7 +7,7 @@ import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Download, Star } from "lucide-react";
+import { User, MapPin, Download, Star, Briefcase, GraduationCap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface JobSeekerProfile {
@@ -16,6 +16,8 @@ interface JobSeekerProfile {
   last_name: string;
   skills: string[] | null;
   experience_level: string | null;
+  education: string | null;
+  designation: string | null;
   resume_url: string | null;
   created_at: string;
   profiles: {
@@ -49,6 +51,8 @@ const BrowseCandidates = () => {
             last_name,
             skills,
             experience_level,
+            education,
+            designation,
             resume_url,
             created_at,
             profiles (
@@ -151,29 +155,40 @@ const BrowseCandidates = () => {
                 </CardHeader>
                 
                 <CardContent className="space-y-4">
-                  {candidate.experience_level && (
-                    <div>
-                      <Badge variant="secondary">
-                        <Star className="h-3 w-3 mr-1" />
-                        {candidate.experience_level}
-                      </Badge>
-                    </div>
-                  )}
+                  <div className="space-y-3">
+                    {candidate.designation && (
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">{candidate.designation}</span>
+                      </div>
+                    )}
+                    
+                    {candidate.education && (
+                      <div className="flex items-center gap-2">
+                        <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{candidate.education}</span>
+                      </div>
+                    )}
+                    
+                    {candidate.experience_level && (
+                      <div>
+                        <Badge variant="secondary">
+                          <Star className="h-3 w-3 mr-1" />
+                          {candidate.experience_level}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
                   
                   {candidate.skills && candidate.skills.length > 0 && (
                     <div>
                       <p className="text-sm font-medium mb-2">Skills:</p>
                       <div className="flex flex-wrap gap-1">
-                        {candidate.skills.slice(0, 3).map((skill, index) => (
+                        {candidate.skills.map((skill, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
                             {skill}
                           </Badge>
                         ))}
-                        {candidate.skills.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{candidate.skills.length - 3} more
-                          </Badge>
-                        )}
                       </div>
                     </div>
                   )}

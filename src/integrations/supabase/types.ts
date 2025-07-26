@@ -61,9 +61,41 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          applied_at: string | null
+          cover_letter: string | null
+          id: string
+          job_id: string
+          job_seeker_profile_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          cover_letter?: string | null
+          id?: string
+          job_id: string
+          job_seeker_profile_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          cover_letter?: string | null
+          id?: string
+          job_id?: string
+          job_seeker_profile_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       job_seeker_profiles: {
         Row: {
           created_at: string | null
+          designation: string | null
+          education: string | null
           experience_level:
             | Database["public"]["Enums"]["experience_level"]
             | null
@@ -77,6 +109,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          designation?: string | null
+          education?: string | null
           experience_level?:
             | Database["public"]["Enums"]["experience_level"]
             | null
@@ -90,6 +124,8 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          designation?: string | null
+          education?: string | null
           experience_level?:
             | Database["public"]["Enums"]["experience_level"]
             | null
@@ -110,6 +146,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      jobs: {
+        Row: {
+          applications_count: number | null
+          country: string | null
+          created_at: string | null
+          description: string
+          employer_profile_id: string
+          expires_at: string | null
+          gender: string | null
+          hide_salary: boolean | null
+          id: string
+          max_experience: number | null
+          max_salary: number | null
+          min_experience: number | null
+          min_salary: number | null
+          openings: number | null
+          status: string
+          title: string
+          updated_at: string | null
+          views_count: number | null
+        }
+        Insert: {
+          applications_count?: number | null
+          country?: string | null
+          created_at?: string | null
+          description: string
+          employer_profile_id: string
+          expires_at?: string | null
+          gender?: string | null
+          hide_salary?: boolean | null
+          id?: string
+          max_experience?: number | null
+          max_salary?: number | null
+          min_experience?: number | null
+          min_salary?: number | null
+          openings?: number | null
+          status?: string
+          title: string
+          updated_at?: string | null
+          views_count?: number | null
+        }
+        Update: {
+          applications_count?: number | null
+          country?: string | null
+          created_at?: string | null
+          description?: string
+          employer_profile_id?: string
+          expires_at?: string | null
+          gender?: string | null
+          hide_salary?: boolean | null
+          id?: string
+          max_experience?: number | null
+          max_salary?: number | null
+          min_experience?: number | null
+          min_salary?: number | null
+          openings?: number | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+          views_count?: number | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

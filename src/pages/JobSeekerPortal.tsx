@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Clock, Bookmark, Filter, Users, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const JobSeekerPortal = () => {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -231,7 +233,7 @@ const JobSeekerPortal = () => {
               showcase your skills, and take the next step in your career.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg">
+              <Button size="lg" onClick={() => navigate('/job-seeker-profile')}>
                 Create Profile
               </Button>
               <Button variant="outline" size="lg">

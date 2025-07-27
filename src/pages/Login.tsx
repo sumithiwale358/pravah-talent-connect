@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Header from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,26 @@ const Login = () => {
         toast.error(error.message || "Failed to sign in");
       } else {
         toast.success("Successfully signed in!");
-        navigate("/");
+        
+        // Fetch user profile to determine user type and redirect accordingly
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('user_type')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (profile?.user_type === 'jobseeker') {
+            navigate("/job-seeker");
+          } else if (profile?.user_type === 'employer') {
+            navigate("/employer");
+          } else {
+            navigate("/");
+          }
+        } else {
+          navigate("/");
+        }
       }
     } catch (error) {
       toast.error("An unexpected error occurred");

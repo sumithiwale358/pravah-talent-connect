@@ -140,36 +140,88 @@ const JobSeekerProfile = () => {
         }
       }
 
-      // First create/update profile
-      const { data: profileData, error: profileError } = await supabase
+      // First get or create profile
+      const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
-          email: user.email,
-          user_type: 'jobseeker',
-          location: formData.location,
-          phone: formData.phone
-        })
-        .select()
+        .select('*')
+        .eq('user_id', user.id)
         .single();
 
-      if (profileError) throw profileError;
+      let profileData;
+      if (existingProfile) {
+        // Update existing profile
+        const { data: updatedProfile, error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            email: user.email,
+            user_type: 'jobseeker',
+            location: formData.location,
+            phone: formData.phone
+          })
+          .eq('user_id', user.id)
+          .select()
+          .single();
+        
+        if (updateError) throw updateError;
+        profileData = updatedProfile;
+      } else {
+        // Create new profile if it doesn't exist
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            email: user.email,
+            user_type: 'jobseeker',
+            location: formData.location,
+            phone: formData.phone
+          })
+          .select()
+          .single();
+        
+        if (createError) throw createError;
+        profileData = newProfile;
+      }
 
-      // Then create job seeker profile
-      const { error: jobSeekerError } = await supabase
+      // Then create or update job seeker profile
+      const { data: existingJobSeekerProfile } = await supabase
         .from('job_seeker_profiles')
-        .upsert({
-          profile_id: profileData.id,
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          designation: formData.designation,
-          experience_level: formData.experienceLevel as any,
-          education: formData.education,
-          skills: skills,
-          resume_url: resumeUrl
-        });
+        .select('*')
+        .eq('profile_id', profileData.id)
+        .single();
 
-      if (jobSeekerError) throw jobSeekerError;
+      if (existingJobSeekerProfile) {
+        // Update existing job seeker profile
+        const { error: updateJSError } = await supabase
+          .from('job_seeker_profiles')
+          .update({
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            designation: formData.designation,
+            experience_level: formData.experienceLevel as any,
+            education: formData.education,
+            skills: skills,
+            resume_url: resumeUrl
+          })
+          .eq('profile_id', profileData.id);
+
+        if (updateJSError) throw updateJSError;
+      } else {
+        // Create new job seeker profile
+        const { error: createJSError } = await supabase
+          .from('job_seeker_profiles')
+          .insert({
+            profile_id: profileData.id,
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            designation: formData.designation,
+            experience_level: formData.experienceLevel as any,
+            education: formData.education,
+            skills: skills,
+            resume_url: resumeUrl
+          });
+
+        if (createJSError) throw createJSError;
+      }
 
       toast({
         title: "Profile Created Successfully!",

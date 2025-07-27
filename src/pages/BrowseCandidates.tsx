@@ -7,7 +7,9 @@ import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Download, Star, Briefcase, GraduationCap } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { User, MapPin, Download, Star, Briefcase, GraduationCap, Search, Filter, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface JobSeekerProfile {
@@ -32,7 +34,14 @@ const BrowseCandidates = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [candidates, setCandidates] = useState<JobSeekerProfile[]>([]);
+  const [filteredCandidates, setFilteredCandidates] = useState<JobSeekerProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [experienceFilter, setExperienceFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [skillFilter, setSkillFilter] = useState("");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -65,6 +74,7 @@ const BrowseCandidates = () => {
 
         if (error) throw error;
         setCandidates(data || []);
+        setFilteredCandidates(data || []);
       } catch (error) {
         console.error("Error fetching candidates:", error);
         toast({
@@ -81,6 +91,50 @@ const BrowseCandidates = () => {
       fetchCandidates();
     }
   }, [user, toast]);
+
+  // Filter function
+  useEffect(() => {
+    let filtered = candidates;
+
+    // Search by name, designation, education
+    if (searchTerm) {
+      filtered = filtered.filter(candidate =>
+        `${candidate.first_name} ${candidate.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        candidate.designation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        candidate.education?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by experience level
+    if (experienceFilter) {
+      filtered = filtered.filter(candidate => candidate.experience_level === experienceFilter);
+    }
+
+    // Filter by location
+    if (locationFilter) {
+      filtered = filtered.filter(candidate =>
+        candidate.profiles.location?.toLowerCase().includes(locationFilter.toLowerCase())
+      );
+    }
+
+    // Filter by skill
+    if (skillFilter) {
+      filtered = filtered.filter(candidate =>
+        candidate.skills?.some(skill => 
+          skill.toLowerCase().includes(skillFilter.toLowerCase())
+        )
+      );
+    }
+
+    setFilteredCandidates(filtered);
+  }, [candidates, searchTerm, experienceFilter, locationFilter, skillFilter]);
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setExperienceFilter("");
+    setLocationFilter("");
+    setSkillFilter("");
+  };
 
   const handleViewResume = (resumeUrl: string | null) => {
     if (resumeUrl) {
@@ -127,6 +181,65 @@ const BrowseCandidates = () => {
           </p>
         </div>
 
+        {/* Search and Filter Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Search & Filter Candidates
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search name, role, education..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <Select value={experienceFilter} onValueChange={setExperienceFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Experience Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="entry">Entry Level</SelectItem>
+                  <SelectItem value="mid">Mid Level</SelectItem>
+                  <SelectItem value="senior">Senior Level</SelectItem>
+                  <SelectItem value="lead">Lead Level</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Input
+                placeholder="Location..."
+                value={locationFilter}
+                onChange={(e) => setLocationFilter(e.target.value)}
+              />
+              
+              <Input
+                placeholder="Skills..."
+                value={skillFilter}
+                onChange={(e) => setSkillFilter(e.target.value)}
+              />
+            </div>
+            
+            {(searchTerm || experienceFilter || locationFilter || skillFilter) && (
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Showing {filteredCandidates.length} of {candidates.length} candidates
+                </div>
+                <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                  <X className="h-4 w-4 mr-1" />
+                  Clear All Filters
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {candidates.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
@@ -137,9 +250,22 @@ const BrowseCandidates = () => {
               </p>
             </CardContent>
           </Card>
+        ) : filteredCandidates.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-12">
+              <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No candidates match your filters</h3>
+              <p className="text-muted-foreground mb-4">
+                Try adjusting your search criteria to find more candidates.
+              </p>
+              <Button variant="outline" onClick={clearAllFilters}>
+                Clear All Filters
+              </Button>
+            </CardContent>
+          </Card>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {candidates.map((candidate) => (
+            {filteredCandidates.map((candidate) => (
               <Card key={candidate.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -184,11 +310,16 @@ const BrowseCandidates = () => {
                     <div>
                       <p className="text-sm font-medium mb-2">Skills:</p>
                       <div className="flex flex-wrap gap-1">
-                        {candidate.skills.map((skill, index) => (
+                        {candidate.skills.slice(0, 4).map((skill, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
                             {skill}
                           </Badge>
                         ))}
+                        {candidate.skills.length > 4 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{candidate.skills.length - 4} more
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   )}

@@ -232,12 +232,9 @@ const JobSeekerPortal = () => {
               Create your profile today and get discovered by top employers. Upload your resume, 
               showcase your skills, and take the next step in your career.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <Button size="lg" onClick={() => navigate('/job-seeker-profile')}>
                 Create Profile
-              </Button>
-              <Button variant="outline" size="lg">
-                Upload Resume
               </Button>
             </div>
           </div>

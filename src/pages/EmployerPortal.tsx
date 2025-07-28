@@ -7,18 +7,28 @@ import { Building2, Users, TrendingUp, Plus, Eye, Clock, CheckCircle } from "luc
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const EmployerPortal = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedJob, setSelectedJob] = useState<number | null>(null);
 
   const handlePostJob = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     console.log("Navigating to post job page...");
     navigate("/post-job");
   };
 
   const handleBrowseCandidates = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     navigate("/browse-candidates");
   };
 

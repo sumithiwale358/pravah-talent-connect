@@ -26,7 +26,7 @@ interface JobSeekerProfile {
     email: string;
     location: string | null;
     phone: string | null;
-  };
+  } | null;
 }
 
 const BrowseCandidates = () => {
@@ -113,7 +113,7 @@ const BrowseCandidates = () => {
     // Filter by location
     if (locationFilter) {
       filtered = filtered.filter(candidate =>
-        candidate.profiles.location?.toLowerCase().includes(locationFilter.toLowerCase())
+        candidate.profiles?.location?.toLowerCase().includes(locationFilter.toLowerCase())
       );
     }
 
@@ -272,7 +272,7 @@ const BrowseCandidates = () => {
                     <User className="h-5 w-5" />
                     {candidate.first_name} {candidate.last_name}
                   </CardTitle>
-                  {candidate.profiles.location && (
+                  {candidate.profiles?.location && (
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <MapPin className="h-4 w-4" />
                       <span className="text-sm">{candidate.profiles.location}</span>
@@ -337,8 +337,9 @@ const BrowseCandidates = () => {
                     
                     <Button
                       size="sm"
-                      onClick={() => handleContactCandidate(candidate.profiles.email)}
+                      onClick={() => handleContactCandidate(candidate.profiles?.email || '')}
                       className="flex-1"
+                      disabled={!candidate.profiles?.email}
                     >
                       Contact
                     </Button>

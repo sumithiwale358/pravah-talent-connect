@@ -50,6 +50,7 @@ const JobSeekerPortal = () => {
           title,
           description,
           country,
+          city,
           min_salary,
           max_salary,
           hide_salary,
@@ -242,7 +243,7 @@ const JobSeekerPortal = () => {
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                           <div className="flex items-center gap-1">
                             <MapPin className="w-4 h-4" />
-                            {job.country || "India"}
+                            {job.city || job.country || "India"}
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="w-4 h-4" />
@@ -266,7 +267,10 @@ const JobSeekerPortal = () => {
                       </div>
 
                       <div className="mt-4 md:mt-0 md:ml-6">
-                        <Button className="w-full md:w-auto">
+                        <Button 
+                          className="w-full md:w-auto"
+                          onClick={() => navigate(`/apply-job/${job.id}`)}
+                        >
                           Apply Now
                         </Button>
                       </div>

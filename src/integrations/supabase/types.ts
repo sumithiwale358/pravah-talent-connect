@@ -150,6 +150,7 @@ export type Database = {
       jobs: {
         Row: {
           applications_count: number | null
+          city: string | null
           country: string | null
           created_at: string | null
           description: string
@@ -170,6 +171,7 @@ export type Database = {
         }
         Insert: {
           applications_count?: number | null
+          city?: string | null
           country?: string | null
           created_at?: string | null
           description: string
@@ -190,6 +192,7 @@ export type Database = {
         }
         Update: {
           applications_count?: number | null
+          city?: string | null
           country?: string | null
           created_at?: string | null
           description?: string

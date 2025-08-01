@@ -45,7 +45,7 @@ const BrowseCandidates = () => {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate("/login");
+      navigate("/login?tab=employer");
     }
   }, [user, loading, navigate]);
 

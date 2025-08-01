@@ -8,11 +8,32 @@ import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Clock, Bookmark, Filter, Users, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const JobSeekerPortal = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Check if user is authenticated and is a job seeker
+  useEffect(() => {
+    if (!authLoading && user) {
+      const checkUserType = async () => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile?.user_type === 'employer') {
+          navigate('/employer');
+        }
+      };
+      
+      checkUserType();
+    }
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     fetchJobs();

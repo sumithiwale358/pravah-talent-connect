@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -18,8 +18,40 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Set initial tab based on URL parameter
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'employer') {
+      setUserType('employer');
+    }
+  }, [searchParams]);
+
+  // Redirect authenticated users based on their type
+  useEffect(() => {
+    if (user) {
+      const fetchUserProfile = async () => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile?.user_type === 'jobseeker') {
+          navigate("/job-seeker");
+        } else if (profile?.user_type === 'employer') {
+          navigate("/employer");
+        } else {
+          navigate("/");
+        }
+      };
+      
+      fetchUserProfile();
+    }
+  }, [user, navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,25 +70,7 @@ const Login = () => {
       } else {
         toast.success("Successfully signed in!");
         
-        // Fetch user profile to determine user type and redirect accordingly
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('user_type')
-            .eq('user_id', user.id)
-            .single();
-          
-          if (profile?.user_type === 'jobseeker') {
-            navigate("/job-seeker");
-          } else if (profile?.user_type === 'employer') {
-            navigate("/employer");
-          } else {
-            navigate("/");
-          }
-        } else {
-          navigate("/");
-        }
+        // User will be redirected by useEffect when user state updates
       }
     } catch (error) {
       toast.error("An unexpected error occurred");

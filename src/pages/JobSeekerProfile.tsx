@@ -37,7 +37,7 @@ const JobSeekerProfile = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate('/login');
+      navigate('/login?tab=jobseeker');
       return;
     }
   }, [user, navigate]);

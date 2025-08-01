@@ -15,6 +15,8 @@ const JobSeekerPortal = () => {
   const { user, loading: authLoading } = useAuth();
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchLocation, setSearchLocation] = useState("");
 
   // Check if user is authenticated and is a job seeker
   useEffect(() => {
@@ -39,9 +41,9 @@ const JobSeekerPortal = () => {
     fetchJobs();
   }, []);
 
-  const fetchJobs = async () => {
+  const fetchJobs = async (keyword = "", location = "") => {
     try {
-      const { data, error } = await (supabase as any)
+      let query = supabase
         .from('jobs')
         .select(`
           id,
@@ -56,22 +58,57 @@ const JobSeekerPortal = () => {
           openings,
           created_at,
           status,
-          employer_profiles (
-            company_name,
-            company_description
-          )
+          employer_profile_id
         `)
-        .eq('status', 'active')
+        .eq('status', 'active');
+
+      // Add search filters
+      if (keyword.trim()) {
+        query = query.or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%`);
+      }
+      
+      if (location.trim()) {
+        query = query.ilike('country', `%${location}%`);
+      }
+
+      const { data: jobsData, error: jobsError } = await query
         .order('created_at', { ascending: false })
         .limit(10);
 
-      if (error) throw error;
-      setJobs(data || []);
+      if (jobsError) throw jobsError;
+
+      // Fetch employer profiles separately
+      if (jobsData && jobsData.length > 0) {
+        const employerProfileIds = [...new Set(jobsData.map(job => job.employer_profile_id))];
+        
+        const { data: employerProfiles, error: employerError } = await supabase
+          .from('employer_profiles')
+          .select('id, company_name, company_description')
+          .in('id', employerProfileIds);
+
+        if (employerError) throw employerError;
+
+        // Map employer profiles to jobs
+        const jobsWithEmployers = jobsData.map(job => ({
+          ...job,
+          employer_profiles: employerProfiles?.find(emp => emp.id === job.employer_profile_id) || null
+        }));
+
+        setJobs(jobsWithEmployers);
+      } else {
+        setJobs([]);
+      }
     } catch (error) {
       console.error('Error fetching jobs:', error);
+      setJobs([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = () => {
+    setLoading(true);
+    fetchJobs(searchKeyword, searchLocation);
   };
 
   const formatSalary = (job: any) => {
@@ -121,6 +158,8 @@ const JobSeekerPortal = () => {
                     <Input
                       placeholder="Job title or keywords"
                       className="pl-10"
+                      value={searchKeyword}
+                      onChange={(e) => setSearchKeyword(e.target.value)}
                     />
                   </div>
                   <div className="relative">
@@ -128,9 +167,11 @@ const JobSeekerPortal = () => {
                     <Input
                       placeholder="Location"
                       className="pl-10"
+                      value={searchLocation}
+                      onChange={(e) => setSearchLocation(e.target.value)}
                     />
                   </div>
-                  <Button className="w-full">
+                  <Button className="w-full" onClick={handleSearch}>
                     Search Jobs
                   </Button>
                 </div>

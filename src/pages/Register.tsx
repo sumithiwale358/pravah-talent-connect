@@ -25,12 +25,13 @@ const Register = () => {
     phone: "",
     location: "",
     experienceLevel: "",
+    designation: "",
+    education: "",
     password: "",
     confirmPassword: "",
     // Employer fields
     companyName: "",
     contactPerson: "",
-    designation: "",
     companySize: "",
     // Common
     acceptTerms: false
@@ -49,7 +50,7 @@ const Register = () => {
 
   const validateForm = () => {
     if (userType === "jobseeker") {
-      if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword) {
+      if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword || !formData.experienceLevel) {
         toast({
           title: "Missing Fields",
           description: "Please fill in all required fields.",
@@ -111,7 +112,9 @@ const Register = () => {
         ...(userType === "jobseeker" && {
           firstName: formData.firstName,
           lastName: formData.lastName,
-          experienceLevel: formData.experienceLevel
+          experienceLevel: formData.experienceLevel,
+          designation: formData.designation,
+          education: formData.education
         }),
         // Employer specific
         ...(userType === "employer" && {
@@ -249,12 +252,32 @@ const Register = () => {
                       <SelectValue placeholder="Select experience level" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="fresher">Fresher (0-1 years)</SelectItem>
-                      <SelectItem value="junior">Junior (1-3 years)</SelectItem>
-                      <SelectItem value="mid">Mid-level (3-7 years)</SelectItem>
-                      <SelectItem value="senior">Senior (7+ years)</SelectItem>
+                      <SelectItem value="entry">Entry Level (0-2 years)</SelectItem>
+                      <SelectItem value="mid">Mid Level (3-5 years)</SelectItem>
+                      <SelectItem value="senior">Senior Level (6-10 years)</SelectItem>
+                      <SelectItem value="lead">Lead Level (10+ years)</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="designation">Current Designation</Label>
+                  <Input
+                    id="designation"
+                    placeholder="e.g., Software Engineer, Marketing Manager"
+                    value={formData.designation}
+                    onChange={(e) => handleInputChange("designation", e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="education">Education</Label>
+                  <Input
+                    id="education"
+                    placeholder="e.g., B.Tech in Computer Science, MBA"
+                    value={formData.education}
+                    onChange={(e) => handleInputChange("education", e.target.value)}
+                  />
                 </div>
 
                 <div className="space-y-2">

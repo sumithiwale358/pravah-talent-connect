@@ -295,12 +295,12 @@ const JobSeekerPortal = () => {
               Ready to Start Your Journey?
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Create your profile today and get discovered by top employers. Upload your resume, 
-              showcase your skills, and take the next step in your career.
+              Join thousands of job seekers who have found their dream careers. 
+              Apply to jobs that match your skills and experience.
             </p>
             <div className="flex justify-center">
-              <Button size="lg" onClick={() => navigate('/job-seeker-profile')}>
-                Create Profile
+              <Button size="lg" onClick={() => navigate('/register')}>
+                Get Started
               </Button>
             </div>
           </div>

@@ -80,71 +80,11 @@ const JobCarousel = () => {
             }`}
           >
             <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 ease-in-out"
               style={{
                 backgroundImage: `url(${slide.image})`,
               }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-transparent" />
-            </div>
-            
-            <div className="relative z-10 h-full flex items-center">
-              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="max-w-2xl">
-                  <div className="animate-fade-in">
-                    <div className="flex items-center gap-2 mb-4">
-                      <MapPin className="w-5 h-5 text-primary" />
-                      <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
-                        {slide.location}
-                      </span>
-                    </div>
-                    
-                    <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
-                      {slide.title}
-                    </h2>
-                    
-                    <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                      {slide.description}
-                    </p>
-                    
-                    <div className="flex items-center gap-8 mb-8">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                          <slide.stats.icon className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-foreground">
-                            {slide.stats.jobs}
-                          </div>
-                          <div className="text-sm text-muted-foreground">Active Jobs</div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-accent/10 rounded-lg">
-                          <Building className="w-5 h-5 text-accent" />
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-foreground">
-                            {slide.stats.companies}
-                          </div>
-                          <div className="text-sm text-muted-foreground">Companies</div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-4">
-                      <Button size="lg" className="hover-scale">
-                        Explore Jobs
-                      </Button>
-                      <Button variant="outline" size="lg" className="hover-scale">
-                        Learn More
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            />
           </div>
         ))}
       </div>

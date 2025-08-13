@@ -13,31 +13,31 @@ const HeroSection = () => {
       </div>
       
       {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/50" />
+      <div className="absolute inset-0 bg-background/95 md:bg-gradient-to-r md:from-background/95 md:via-background/85 md:to-background/70" />
       
       {/* Hero Content */}
-      <div className="relative z-10 h-full flex items-center">
+      <div className="relative z-20 h-full flex items-center">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="animate-fade-in">
-              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
+            <div className="animate-fade-in bg-background/20 backdrop-blur-sm rounded-2xl p-8 md:p-12">
+              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 drop-shadow-lg">
                 Connecting Talent with
-                <span className="block text-primary mt-2">Opportunity Across India</span>
+                <span className="block text-primary mt-2 drop-shadow-lg">Opportunity Across India</span>
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Pravah Organisation bridges the gap between skilled job seekers and forward-thinking employers. 
+              <p className="text-lg md:text-xl text-foreground/90 mb-8 max-w-2xl mx-auto drop-shadow-md">
+                Pravah Organisation bridges the gap between skilled job seekers and forward-thinking employers.
                 Start your journey today and discover unlimited possibilities.
               </p>
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 hover-scale">
+                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 hover-scale shadow-lg">
                   <Link to="/job-seeker" className="flex items-center gap-2">
                     <Users className="w-5 h-5" />
                     I'm Looking for Jobs
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="bg-background/50 hover:bg-background/70 hover-scale">
+                <Button asChild variant="outline" size="lg" className="bg-background/90 hover:bg-background hover-scale shadow-lg border-2">
                   <Link to="/employer" className="flex items-center gap-2">
                     <Building2 className="w-5 h-5" />
                     I'm Hiring Talent

@@ -8,36 +8,36 @@ const HeroSection = () => {
   return (
     <section className="relative h-[600px] overflow-hidden">
       {/* Background Carousel */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-0">
         <JobCarousel />
       </div>
       
       {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-background/95 md:bg-gradient-to-r md:from-background/95 md:via-background/85 md:to-background/70" />
+      <div className="absolute inset-0 z-10 bg-black/40" />
       
-      {/* Hero Content */}
-      <div className="relative z-20 h-full flex items-center">
+      {/* Hero Content - Positioned on top */}
+      <div className="absolute inset-0 z-20 flex items-center justify-center">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="animate-fade-in bg-background/20 backdrop-blur-sm rounded-2xl p-8 md:p-12">
-              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 drop-shadow-lg">
+            <div className="animate-fade-in">
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-2xl">
                 Connecting Talent with
-                <span className="block text-primary mt-2 drop-shadow-lg">Opportunity Across India</span>
+                <span className="block text-orange-400 mt-2">Opportunity Across India</span>
               </h1>
-              <p className="text-lg md:text-xl text-foreground/90 mb-8 max-w-2xl mx-auto drop-shadow-md">
-                Pravah Organisation bridges the gap between skilled job seekers and forward-thinking employers.
+              <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto drop-shadow-lg">
+                Pravah Organisation bridges the gap between skilled job seekers and forward-thinking employers. 
                 Start your journey today and discover unlimited possibilities.
               </p>
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 hover-scale shadow-lg">
+                <Button asChild size="lg" className="bg-orange-500 hover:bg-orange-600 text-white hover-scale shadow-lg border-0">
                   <Link to="/job-seeker" className="flex items-center gap-2">
                     <Users className="w-5 h-5" />
                     I'm Looking for Jobs
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="bg-background/90 hover:bg-background hover-scale shadow-lg border-2">
+                <Button asChild variant="outline" size="lg" className="bg-white/10 hover:bg-white/20 text-white border-white/50 hover:border-white hover-scale shadow-lg backdrop-blur-sm">
                   <Link to="/employer" className="flex items-center gap-2">
                     <Building2 className="w-5 h-5" />
                     I'm Hiring Talent

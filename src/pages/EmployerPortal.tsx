@@ -14,7 +14,8 @@ const EmployerPortal = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [selectedJob, setSelectedJob] = useState<number | null>(null);
+  const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [recentJobs, setRecentJobs] = useState<any[]>([]);
 
   // Check if user is authenticated and is an employer
   useEffect(() => {
@@ -34,6 +35,38 @@ const EmployerPortal = () => {
       checkUserType();
     }
   }, [user, authLoading, navigate]);
+
+  // Fetch recent jobs posted by employer
+  useEffect(() => {
+    if (user) {
+      const fetchRecentJobs = async () => {
+        const { data: jobs } = await supabase
+          .from('jobs')
+          .select(`
+            id,
+            title,
+            status,
+            applications_count,
+            created_at,
+            employer_profiles!inner(
+              profile_id,
+              profiles!inner(
+                user_id
+              )
+            )
+          `)
+          .eq('employer_profiles.profiles.user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (jobs) {
+          setRecentJobs(jobs);
+        }
+      };
+
+      fetchRecentJobs();
+    }
+  }, [user]);
 
   const handlePostJob = () => {
     if (!user) {
@@ -60,7 +93,7 @@ const EmployerPortal = () => {
     // In a real app, this would navigate to all jobs page
   };
 
-  const handleViewJob = (jobId: number) => {
+  const handleViewJob = (jobId: string) => {
     setSelectedJob(jobId);
     toast({
       title: "View Job Details",
@@ -69,7 +102,7 @@ const EmployerPortal = () => {
     // In a real app, this would navigate to job details page
   };
 
-  const handleEditJob = (jobId: number) => {
+  const handleEditJob = (jobId: string) => {
     toast({
       title: "Edit Job",
       description: `Opening editor for job ID: ${jobId}`,
@@ -111,32 +144,18 @@ const EmployerPortal = () => {
     }
   ];
 
-  const recentPostings = [
-    {
-      id: 1,
-      title: "Senior React Developer",
-      department: "Engineering",
-      applications: 45,
-      status: "Active",
-      posted: "2 days ago"
-    },
-    {
-      id: 2,
-      title: "Product Manager",
-      department: "Product",
-      applications: 32,
-      status: "Active",
-      posted: "1 week ago"
-    },
-    {
-      id: 3,
-      title: "UX Designer",
-      department: "Design",
-      applications: 28,
-      status: "Closed",
-      posted: "2 weeks ago"
-    }
-  ];
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) return "Today";
+    if (diffInDays === 1) return "1 day ago";
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+    if (diffInDays < 14) return "1 week ago";
+    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
+    return `${Math.floor(diffInDays / 30)} months ago`;
+  };
 
   const stats = [
     { label: "Active Job Posts", value: "12", icon: Building2 },
@@ -222,42 +241,51 @@ const EmployerPortal = () => {
             </div>
 
             <div className="grid gap-4">
-              {recentPostings.map((job) => (
-                <Card key={job.id} className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-foreground">{job.title}</h3>
-                        <Badge variant={job.status === 'Active' ? 'default' : 'secondary'}>
-                          {job.status}
-                        </Badge>
-                      </div>
-                      
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{job.department}</span>
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          {job.applications} applications
+              {recentJobs.length > 0 ? (
+                recentJobs.map((job) => (
+                  <Card key={job.id} className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold text-foreground">{job.title}</h3>
+                          <Badge variant={job.status === 'active' ? 'default' : 'secondary'}>
+                            {job.status === 'active' ? 'Active' : job.status}
+                          </Badge>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {job.posted}
+                        
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Users className="w-4 h-4" />
+                            {job.applications_count || 0} applications
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {formatTimeAgo(job.created_at)}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex gap-2 mt-4 md:mt-0">
-                      <Button variant="outline" size="sm" onClick={() => handleViewJob(job.id)}>
-                        <Eye className="w-4 h-4 mr-2" />
-                        View
-                      </Button>
-                      <Button size="sm" onClick={() => handleEditJob(job.id)}>
-                        Edit
-                      </Button>
+                      <div className="flex gap-2 mt-4 md:mt-0">
+                        <Button variant="outline" size="sm" onClick={() => handleViewJob(job.id)}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          View
+                        </Button>
+                        <Button size="sm" onClick={() => handleEditJob(job.id)}>
+                          Edit
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  </Card>
+                ))
+              ) : (
+                <Card className="p-8 text-center">
+                  <p className="text-muted-foreground">No jobs posted yet.</p>
+                  <Button onClick={handlePostJob} className="mt-4">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Post Your First Job
+                  </Button>
                 </Card>
-              ))}
+              )}
             </div>
           </div>
         </section>

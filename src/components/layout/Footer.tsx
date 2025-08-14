@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
 import { Users, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 const Footer = () => {
-  return (
-    <footer className="bg-foreground text-background">
+  return <footer className="bg-foreground text-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
@@ -22,15 +20,15 @@ const Footer = () => {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-background/80">
                 <Mail className="w-4 h-4" />
-                <span>contact@pravahorg.in</span>
+                <span>ashishiwale32@gmail.com</span>
               </div>
               <div className="flex items-center gap-2 text-background/80">
                 <Phone className="w-4 h-4" />
-                <span>+91 98765 43210</span>
+                <span>+91 9623989784</span>
               </div>
               <div className="flex items-center gap-2 text-background/80">
                 <MapPin className="w-4 h-4" />
-                <span>Mumbai, Maharashtra, India</span>
+                <span>Pune, Maharashtra, India</span>
               </div>
             </div>
           </div>
@@ -123,8 +121,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;

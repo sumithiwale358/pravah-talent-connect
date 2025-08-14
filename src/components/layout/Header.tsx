@@ -38,9 +38,9 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <img 
-              src="/lovable-uploads/abf57161-4913-4de7-8f1e-af97323263b4.png" 
+              src="/lovable-uploads/e8500756-b91e-4d73-9dc3-1124c02a32e8.png" 
               alt="Pravah Organisation Logo" 
-              className="w-16 h-16 object-contain"
+              className="w-20 h-20 object-contain"
             />
             <span className="text-xl font-bold text-foreground">Pravah Organisation</span>
           </Link>

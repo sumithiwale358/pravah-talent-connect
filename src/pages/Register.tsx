@@ -319,12 +319,12 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
+                  <Label htmlFor="location">Address</Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="location"
-                      placeholder="City, State"
+                      placeholder="Complete Address"
                       className="pl-10"
                       value={formData.location}
                       onChange={(e) => handleInputChange("location", e.target.value)}

@@ -202,73 +202,66 @@ const JobSeekerPortal = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-bold text-foreground">Featured Jobs</h2>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Filter className="w-4 h-4" />
-                Filters
-              </Button>
             </div>
 
-            <div className="grid gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {loading ? (
-                <div className="text-center py-8">
+                <div className="col-span-full text-center py-8">
                   <div className="text-muted-foreground">Loading jobs...</div>
                 </div>
               ) : jobs.length === 0 ? (
-                <div className="text-center py-8">
+                <div className="col-span-full text-center py-8">
                   <div className="text-muted-foreground">No jobs found. Check back later!</div>
                 </div>
               ) : (
                 jobs.map((job) => (
-                  <Card key={job.id} className="p-6 hover:shadow-elevation transition-shadow duration-300">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="text-xl font-semibold text-foreground">{job.title}</h3>
-                          <Button variant="ghost" size="icon">
-                            <Bookmark className="w-5 h-5" />
-                          </Button>
+                  <Card key={job.id} className="p-4 hover:shadow-elevation transition-shadow duration-300">
+                    <div className="flex flex-col">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="text-lg font-semibold text-foreground line-clamp-2">{job.title}</h3>
+                        <Button variant="ghost" size="icon" className="ml-2 flex-shrink-0">
+                          <Bookmark className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 text-muted-foreground mb-3">
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          <span className="text-sm truncate">{job.employer_profiles?.company_name || "Company"}</span>
                         </div>
-                        
-                        <div className="flex items-center gap-4 text-muted-foreground mb-3">
-                          <div className="flex items-center gap-1">
-                            <Users className="w-4 h-4" />
-                            {job.employer_profiles?.company_name || "Company"}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-primary text-primary" />
-                            4.0
-                          </div>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-primary text-primary" />
+                          <span className="text-sm">4.0</span>
                         </div>
-
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                          <div className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            {job.city || job.country || "India"}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {getTimeAgo(job.created_at)}
-                          </div>
-                          <Badge variant="secondary">Full-time</Badge>
-                        </div>
-
-                        {job.min_experience && job.max_experience && (
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            <Badge variant="outline">
-                              {job.min_experience}-{job.max_experience} years exp
-                            </Badge>
-                            {job.openings && (
-                              <Badge variant="outline">{job.openings} openings</Badge>
-                            )}
-                          </div>
-                        )}
-
-                        <div className="text-lg font-semibold text-primary">{formatSalary(job)}</div>
                       </div>
 
-                      <div className="mt-4 md:mt-0 md:ml-6">
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-3">
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          {job.city || "India"}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          {getTimeAgo(job.created_at)}
+                        </div>
+                        <Badge variant="secondary" className="text-xs">Full-time</Badge>
+                      </div>
+
+                      {job.min_experience && job.max_experience && (
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          <Badge variant="outline" className="text-xs">
+                            {job.min_experience}-{job.max_experience} years exp
+                          </Badge>
+                          {job.openings && (
+                            <Badge variant="outline" className="text-xs">{job.openings} openings</Badge>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <div className="text-base font-semibold text-primary">{formatSalary(job)}</div>
                         <Button 
-                          className="w-full md:w-auto"
+                          size="sm"
                           onClick={() => navigate(`/apply-job/${job.id}`)}
                         >
                           Apply Now

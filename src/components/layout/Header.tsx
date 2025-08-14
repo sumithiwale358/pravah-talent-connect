@@ -40,7 +40,7 @@ const Header = () => {
             <img 
               src="/lovable-uploads/abf57161-4913-4de7-8f1e-af97323263b4.png" 
               alt="Pravah Organisation Logo" 
-              className="w-12 h-12 object-contain"
+              className="w-16 h-16 object-contain"
             />
             <span className="text-xl font-bold text-foreground">Pravah Organisation</span>
           </Link>

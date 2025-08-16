@@ -40,7 +40,8 @@ const EmployerPortal = () => {
   useEffect(() => {
     if (user) {
       const fetchRecentJobs = async () => {
-        const { data: jobs } = await supabase
+        console.log('Fetching jobs for user:', user.id);
+        const { data: jobs, error } = await supabase
           .from('jobs')
           .select(`
             id,
@@ -59,7 +60,9 @@ const EmployerPortal = () => {
           .order('created_at', { ascending: false })
           .limit(5);
 
+        console.log('Query result:', { jobs, error });
         if (jobs) {
+          console.log('Setting recent jobs:', jobs);
           setRecentJobs(jobs);
         }
       };

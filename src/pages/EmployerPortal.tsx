@@ -107,20 +107,11 @@ const EmployerPortal = () => {
   };
 
   const handleViewJob = (jobId: string) => {
-    setSelectedJob(jobId);
-    toast({
-      title: "View Job Details",
-      description: `Loading details for job ID: ${jobId}`,
-    });
-    // In a real app, this would navigate to job details page
+    navigate(`/job-details/${jobId}`);
   };
 
   const handleEditJob = (jobId: string) => {
-    toast({
-      title: "Edit Job",
-      description: `Opening editor for job ID: ${jobId}`,
-    });
-    // In a real app, this would navigate to job editing form
+    navigate(`/post-job?edit=${jobId}`);
   };
 
   const handleGetStarted = (plan: string) => {

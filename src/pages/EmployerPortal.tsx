@@ -41,29 +41,39 @@ const EmployerPortal = () => {
     if (user) {
       const fetchRecentJobs = async () => {
         console.log('Fetching jobs for user:', user.id);
-        const { data: jobs, error } = await supabase
-          .from('jobs')
+        
+        // First get the employer profile for this user
+        const { data: employerProfile, error: profileError } = await supabase
+          .from('employer_profiles')
           .select(`
             id,
-            title,
-            status,
-            applications_count,
-            created_at,
-            employer_profiles!inner(
-              profile_id,
-              profiles!inner(
-                user_id
-              )
-            )
+            profiles!inner(user_id)
           `)
-          .eq('employer_profiles.profiles.user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(5);
+          .eq('profiles.user_id', user.id)
+          .single();
 
-        console.log('Query result:', { jobs, error });
-        if (jobs) {
-          console.log('Setting recent jobs:', jobs);
-          setRecentJobs(jobs);
+        console.log('Employer profile:', { employerProfile, profileError });
+
+        if (employerProfile) {
+          // Then get jobs for this employer profile
+          const { data: jobs, error } = await supabase
+            .from('jobs')
+            .select(`
+              id,
+              title,
+              status,
+              applications_count,
+              created_at
+            `)
+            .eq('employer_profile_id', employerProfile.id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+          console.log('Query result:', { jobs, error });
+          if (jobs) {
+            console.log('Setting recent jobs:', jobs);
+            setRecentJobs(jobs);
+          }
         }
       };
 

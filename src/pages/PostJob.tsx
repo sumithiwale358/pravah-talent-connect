@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,10 @@ const PostJob = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, loading } = useAuth();
+  const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const editJobId = searchParams.get('edit');
+  const isEditing = !!editJobId;
 
   // Redirect to login if user is not authenticated
   useEffect(() => {
@@ -26,6 +29,50 @@ const PostJob = () => {
       navigate("/login?tab=employer");
     }
   }, [user, loading, navigate]);
+
+  // Load job data if editing
+  useEffect(() => {
+    if (isEditing && editJobId && user) {
+      const loadJobData = async () => {
+        try {
+          const { data: job, error } = await supabase
+            .from('jobs')
+            .select('*')
+            .eq('id', editJobId)
+            .single();
+
+          if (error) throw error;
+          
+          if (job) {
+            setFormData({
+              title: job.title || '',
+              description: job.description || '',
+              department: '',
+              location: job.city || '',
+              country: job.country || 'India',
+              minSalary: job.min_salary?.toString() || '',
+              maxSalary: job.max_salary?.toString() || '',
+              hideSalary: job.hide_salary || false,
+              minExperience: job.min_experience?.toString() || '',
+              maxExperience: job.max_experience?.toString() || '',
+              openings: job.openings?.toString() || '',
+              gender: job.gender || '',
+              expiresAt: job.expires_at ? new Date(job.expires_at).toISOString().split('T')[0] : ''
+            });
+          }
+        } catch (error) {
+          console.error('Error loading job data:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load job data for editing.",
+            variant: "destructive"
+          });
+        }
+      };
+
+      loadJobData();
+    }
+  }, [isEditing, editJobId, user, toast]);
 
   // Show loading while checking authentication
   if (loading) {
@@ -110,11 +157,11 @@ const PostJob = () => {
         throw new Error("Employer profile not found");
       }
 
-      // Create job posting
+      // Prepare job data
       const jobData = {
         title: formData.title,
         description: formData.description,
-        employer_profile_id: employerProfile.id,
+        city: formData.location || null,
         country: formData.country,
         min_salary: formData.minSalary ? parseInt(formData.minSalary) : null,
         max_salary: formData.maxSalary ? parseInt(formData.maxSalary) : null,
@@ -127,16 +174,37 @@ const PostJob = () => {
         status: 'active'
       };
 
-      const { error } = await (supabase as any)
-        .from('jobs')
-        .insert([jobData]);
+      if (isEditing && editJobId) {
+        // Update existing job
+        const { error } = await supabase
+          .from('jobs')
+          .update(jobData)
+          .eq('id', editJobId);
 
-      if (error) throw error;
-      
-      toast({
-        title: "Job Posted Successfully!",
-        description: "Your job posting is now live and visible to candidates."
-      });
+        if (error) throw error;
+        
+        toast({
+          title: "Job Updated Successfully!",
+          description: "Your job posting has been updated."
+        });
+      } else {
+        // Create new job posting
+        const jobDataWithProfile = {
+          ...jobData,
+          employer_profile_id: employerProfile.id
+        };
+
+        const { error } = await supabase
+          .from('jobs')
+          .insert([jobDataWithProfile]);
+
+        if (error) throw error;
+        
+        toast({
+          title: "Job Posted Successfully!",
+          description: "Your job posting is now live and visible to candidates."
+        });
+      }
       
       navigate("/employer");
     } catch (error) {
@@ -172,10 +240,15 @@ const PostJob = () => {
               <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                 <Building2 className="w-5 h-5 text-primary" />
               </div>
-              <h1 className="text-3xl font-bold text-foreground">Post a New Job</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                {isEditing ? 'Edit Job' : 'Post a New Job'}
+              </h1>
             </div>
             <p className="text-muted-foreground">
-              Fill out the details below to create your job posting and start attracting top talent.
+              {isEditing 
+                ? 'Update the details below to modify your job posting.'
+                : 'Fill out the details below to create your job posting and start attracting top talent.'
+              }
             </p>
           </div>
 
@@ -195,12 +268,12 @@ const PostJob = () => {
                   />
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="department">Department</Label>
-                  <Select onValueChange={(value) => handleInputChange("department", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
+                  <div className="grid gap-2">
+                    <Label htmlFor="department">Department</Label>
+                    <Select onValueChange={(value) => handleInputChange("department", value)} value={formData.department}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select department" />
+                      </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="engineering">Engineering</SelectItem>
                       <SelectItem value="product">Product</SelectItem>
@@ -346,7 +419,7 @@ const PostJob = () => {
                   
                   <div className="grid gap-2">
                     <Label htmlFor="gender">Gender Preference</Label>
-                    <Select onValueChange={(value) => handleInputChange("gender", value)}>
+                    <Select onValueChange={(value) => handleInputChange("gender", value)} value={formData.gender}>
                       <SelectTrigger>
                         <SelectValue placeholder="Any" />
                       </SelectTrigger>
@@ -382,7 +455,10 @@ const PostJob = () => {
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Posting Job..." : "Post Job"}
+                {isSubmitting 
+                  ? (isEditing ? "Updating Job..." : "Posting Job...")
+                  : (isEditing ? "Update Job" : "Post Job")
+                }
               </Button>
             </div>
           </form>

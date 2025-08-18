@@ -1,33 +1,97 @@
 import { Card } from "@/components/ui/card";
 import { Users, Building2, MapPin, CheckCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const StatsSection = () => {
-  const stats = [
+  const [stats, setStats] = useState([
     {
       icon: Users,
-      value: "50,000+",
+      value: "0",
       label: "Job Seekers",
       description: "Professionals registered and actively seeking opportunities"
     },
     {
       icon: Building2,
-      value: "2,500+",
+      value: "0",
       label: "Companies",
       description: "Verified employers posting quality job opportunities"
     },
     {
       icon: CheckCircle,
-      value: "15,000+",
+      value: "0",
       label: "Successful Placements",
       description: "Lives transformed through meaningful career connections"
     },
     {
       icon: MapPin,
-      value: "200+",
+      value: "0",
       label: "Cities Covered",
       description: "Opportunities available across major Indian cities"
     }
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // Fetch job seekers count
+        const { count: jobSeekersCount } = await supabase
+          .from('job_seeker_profiles')
+          .select('*', { count: 'exact', head: true });
+
+        // Fetch companies count
+        const { count: companiesCount } = await supabase
+          .from('employer_profiles')
+          .select('*', { count: 'exact', head: true });
+
+        // Fetch successful placements count (assuming 'hired' status means successful)
+        const { count: placementsCount } = await supabase
+          .from('job_applications')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'hired');
+
+        // Fetch unique cities count
+        const { data: citiesData } = await supabase
+          .from('jobs')
+          .select('city')
+          .not('city', 'is', null);
+
+        const uniqueCities = new Set(citiesData?.map(job => job.city).filter(Boolean));
+        const citiesCount = uniqueCities.size;
+
+        setStats([
+          {
+            icon: Users,
+            value: jobSeekersCount ? `${jobSeekersCount.toLocaleString()}+` : "0",
+            label: "Job Seekers",
+            description: "Professionals registered and actively seeking opportunities"
+          },
+          {
+            icon: Building2,
+            value: companiesCount ? `${companiesCount.toLocaleString()}+` : "0",
+            label: "Companies",
+            description: "Verified employers posting quality job opportunities"
+          },
+          {
+            icon: CheckCircle,
+            value: placementsCount ? `${placementsCount.toLocaleString()}+` : "0",
+            label: "Successful Placements",
+            description: "Lives transformed through meaningful career connections"
+          },
+          {
+            icon: MapPin,
+            value: citiesCount ? `${citiesCount}+` : "0",
+            label: "Cities Covered",
+            description: "Opportunities available across major Indian cities"
+          }
+        ]);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   return (
     <section className="py-16 bg-muted/30">

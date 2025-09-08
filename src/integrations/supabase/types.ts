@@ -251,7 +251,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_active_jobs_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_employer_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_job_seeker_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
     }
     Enums: {
       company_size: "startup" | "small" | "medium" | "large" | "enterprise"

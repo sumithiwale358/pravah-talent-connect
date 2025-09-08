@@ -34,26 +34,22 @@ const StatsSection = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Fetch job seekers count
-        const { count: jobSeekersCount } = await supabase
-          .from('job_seeker_profiles')
-          .select('*', { count: 'exact', head: true });
+        // Use secure counting functions instead of direct table access
+        const { data: jobSeekersCount } = await supabase.rpc('get_job_seeker_count');
+        const { data: companiesCount } = await supabase.rpc('get_employer_count');
+        const { data: jobsCount } = await supabase.rpc('get_active_jobs_count');
 
-        // Fetch companies count
-        const { count: companiesCount } = await supabase
-          .from('employer_profiles')
-          .select('*', { count: 'exact', head: true });
-
-        // Fetch successful placements count (assuming 'hired' status means successful)
+        // For successful placements, we'll count hired applications
         const { count: placementsCount } = await supabase
           .from('job_applications')
           .select('*', { count: 'exact', head: true })
           .eq('status', 'hired');
 
-        // Fetch unique cities count
+        // Fetch unique cities count from active jobs only
         const { data: citiesData } = await supabase
           .from('jobs')
           .select('city')
+          .eq('status', 'active')
           .not('city', 'is', null);
 
         const uniqueCities = new Set(citiesData?.map(job => job.city).filter(Boolean));

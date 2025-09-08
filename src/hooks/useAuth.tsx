@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, userData: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInWithOAuth: (provider: 'google' | 'linkedin_oidc', userType: 'jobseeker' | 'employer') => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
 
@@ -124,6 +125,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
+  const signInWithOAuth = async (provider: 'google' | 'linkedin_oidc', userType: 'jobseeker' | 'employer') => {
+    const redirectUrl = `${window.location.origin}/auth/callback?type=${userType}`;
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: redirectUrl
+      }
+    });
+    return { error };
+  };
+
   const signOut = async () => {
     try {
       // Clear local state first
@@ -154,6 +167,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loading,
     signUp,
     signIn,
+    signInWithOAuth,
     signOut
   };
 

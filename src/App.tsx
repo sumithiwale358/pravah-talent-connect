@@ -15,6 +15,7 @@ import Register from "./pages/Register";
 import JobSeekerProfile from "./pages/JobSeekerProfile";
 import ApplyJob from "./pages/ApplyJob";
 import JobDetails from "./pages/JobDetails";
+import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/job-seeker-profile" element={<JobSeekerProfile />} />
             <Route path="/apply-job/:jobId" element={<ApplyJob />} />
             <Route path="/job-details/:jobId" element={<JobDetails />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
